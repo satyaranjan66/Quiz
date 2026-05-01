@@ -1,205 +1,258 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Satya Quiz Game - 50 Levels</title>
+    <title>Satya 10 to UPSC & Academic Quiz</title>
     <style>
-        :root { --gold: #ffcc00; --blue: #00d4ff; --dark: #050520; }
-        
+        :root { --gold: #ffcc00; --blue: #00d4ff; --green: #28a745; --red: #dc3545; }
         body {
             background: radial-gradient(circle, #1a1a4d, #000);
             color: white; font-family: 'Segoe UI', sans-serif;
-            margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh;
-            overflow: hidden;
+            margin: 0; display: flex; justify-content: center; align-items: flex-start; height: 100vh;
+            overflow: hidden; padding-top: 10px;
+        }
+        #game-container, #home-page {
+            width: 94%; max-width: 450px; background: rgba(0, 0, 0, 0.95);
+            border: 2px solid var(--gold); border-radius: 25px; padding: 15px;
+            box-shadow: 0 0 40px var(--blue); text-align: center; position: relative;
+        }
+        #game-container { display: none; }
+        
+        .cat-btn {
+            background: linear-gradient(145deg, #151515, #222);
+            color: white; border: 1.5px solid var(--gold);
+            padding: 15px; margin: 8px 0; border-radius: 15px;
+            cursor: pointer; width: 100%; font-size: 1rem; font-weight: bold;
+            display: block; transition: 0.3s;
+        }
+        .cat-btn:hover { background: var(--gold); color: black; }
+
+        select {
+            width: 100%; padding: 12px; margin: 15px 0;
+            background: #111; color: var(--gold);
+            border: 2px solid var(--blue); border-radius: 12px;
+            font-size: 1rem; outline: none;
         }
 
-        /* --- Welcome Screen Pop-up --- */
-        #welcome-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.98); z-index: 100;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            text-align: center; padding: 20px;
-        }
+        #timer { font-size: 35px; color: #ff4444; font-weight: bold; text-shadow: 0 0 10px red; }
+        .top-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .pause-btn { background: var(--gold); color: black; border: none; padding: 8px 25px; border-radius: 12px; font-weight: bold; cursor: pointer; }
+        
+        .result-bar { display: flex; justify-content: space-around; background: #111; padding: 10px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #333; font-size: 14px; }
+        
+        .question-box { background: #0a0a0a; padding: 20px; border-radius: 18px; border: 1.5px solid var(--blue); margin-bottom: 20px; min-height: 120px; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; line-height: 1.4; }
+        
+        .options-grid { display: grid; gap: 12px; }
+        .opt-btn { background: #151515; color: white; border: 1.5px solid #444; padding: 15px; border-radius: 15px; cursor: pointer; text-align: left; font-size: 1rem; transition: 0.2s; }
+        .opt-btn:active { transform: scale(0.98); }
+        
+        .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); border-radius: 23px; z-index: 50; display: none; flex-direction: column; padding: 20px; box-sizing: border-box; }
+        .history-scroll { flex-grow: 1; overflow-y: auto; background: #0a0a0a; border-radius: 15px; padding: 15px; margin: 15px 0; border: 1px solid #222; text-align: left; font-size: 0.9rem; }
+        
+        .resume-btn { background: var(--green); color: white; border: none; padding: 15px; border-radius: 40px; font-size: 1.1rem; cursor: pointer; font-weight: bold; }
+        .correct { background: var(--green) !important; border-color: white !important; animation: pulse 0.5s; }
+        .wrong { background: var(--red) !important; border-color: white !important; }
 
-        .welcome-card {
-            border: 2px solid var(--gold); padding: 30px; border-radius: 20px;
-            background: #111; box-shadow: 0 0 40px var(--blue); max-width: 400px;
-        }
-
-        h1 { color: var(--gold); margin-top: 0; text-shadow: 0 0 15px var(--gold); }
-
-        .rules-box {
-            text-align: left; background: #222; padding: 15px; 
-            border-radius: 10px; margin: 20px 0; font-size: 14px; line-height: 1.6;
-        }
-
-        .start-btn {
-            background: linear-gradient(to bottom, #ffcc00, #ff9900);
-            color: black; border: none; padding: 15px 45px;
-            font-size: 18px; font-weight: bold; border-radius: 50px;
-            cursor: pointer; transition: 0.3s;
-        }
-
-        .start-btn:hover { transform: scale(1.1); box-shadow: 0 0 25px var(--gold); }
-
-        .insta-btn {
-            margin-top: 25px; display: inline-block; color: #e1306c;
-            text-decoration: none; font-weight: bold; font-size: 15px;
-        }
-
-        /* --- Main Game Layout --- */
-        #game-container {
-            width: 92%; max-width: 450px; background: rgba(0, 0, 0, 0.9);
-            border: 2px solid var(--gold); border-radius: 20px; padding: 20px;
-            box-shadow: 0 0 30px var(--blue); text-align: center;
-            display: none; /* Initially Hidden */
-        }
-
-        #timer { font-size: 32px; color: #ff4444; font-weight: bold; margin-bottom: 10px; }
-
-        .status-bar { display: flex; justify-content: space-between; color: var(--gold); margin-bottom: 15px; font-weight: bold; }
-
-        .question-display {
-            background: #111; padding: 25px; border-radius: 15px; border: 1px solid var(--blue);
-            margin-bottom: 25px; min-height: 90px; display: flex; align-items: center; justify-content: center;
-            font-size: 1.1rem;
-        }
-
-        .options-grid { display: grid; gap: 15px; }
-
-        .opt-btn {
-            background: transparent; color: white; border: 1.5px solid var(--gold);
-            padding: 15px; border-radius: 50px; cursor: pointer; transition: 0.3s;
-            text-align: left; padding-left: 35px; font-size: 1rem;
-        }
-
-        .opt-btn:hover { background: rgba(255, 204, 0, 0.2); }
-        .correct { background: #28a745 !important; border-color: #28a745; }
-        .wrong { background: #dc3545 !important; border-color: #dc3545; }
-
-        .footer-progress { margin-top: 20px; font-size: 12px; color: #777; }
+        @keyframes pulse { 0% {transform: scale(1);} 50% {transform: scale(1.05);} 100% {transform: scale(1);} }
     </style>
 </head>
 <body>
 
-    <div id="welcome-screen">
-        <div class="welcome-card">
-            <h1>WELCOME TO<br>SATYA QUIZ GAME</h1>
-            <div class="rules-box">
-                <b>Kaise Khele (How to Play):</b><br>
-                • Isme total 50 levels hain.<br>
-                • Har level mein 10 sawal honge.<br>
-                • Har sawal ke liye 60 seconds milenge.<br>
-                • Galat jawab pe game turant khatam!
-            </div>
-            <button class="start-btn" onclick="initGame()">CHALO SHURU KAREIN</button><br>
-            <a href="https://www.instagram.com/__crazy__king__satya__" target="_blank" class="insta-btn">📸 Feedback on Instagram</a>
-        </div>
+    <div id="home-page">
+        <h1 style="color:var(--gold); margin-bottom:5px;">SATYA GLOBAL QUIZ</h1>
+        <p style="color:#aaa; font-size:0.9rem;">Advanced Level: Class 10 to UPSC</p>
+        
+        <p style="margin-top:15px; margin-bottom:5px;">Select Your Language:</p>
+        <select id="lang-select">
+            <option value="hi">🇮🇳 Hindi (हिंदी)</option>
+            <option value="en" selected>🇺🇸 English</option>
+            <option value="bn">🇧🇩 Bengali (বাংলা)</option>
+            <option value="pa">🇮🇳 Punjabi (ਪੰਜਾਬੀ)</option>
+            <option value="es">🇪🇸 Spanish</option>
+        </select>
+
+        <p style="color:var(--blue)">Choose Exam Category:</p>
+        <button class="cat-btn" onclick="startGame(9)">🌐 General Studies (Mixed)</button>
+        <button class="cat-btn" onclick="startGame(23)">📜 History (Ancient/Modern)</button>
+        <button class="cat-btn" onclick="startGame(17)">🧪 Science & Tech</button>
+        <button class="cat-btn" onclick="startGame(22)">🗺️ Geography & Earth Sci</button>
+        <button class="cat-btn" onclick="startGame(24)">⚖️ Politics & Constitution</button>
     </div>
 
     <div id="game-container">
-        <div id="timer">60</div>
-        <div class="status-bar">
-            <span id="lvl-txt">LEVEL: 1/50</span>
-            <span id="prize-txt">₹0</span>
+        <div id="pause-overlay" class="overlay">
+            <h2 style="color:var(--gold)">📊 PERFORMANCE REPORT</h2>
+            <div class="history-scroll" id="detailed-history"></div>
+            <button class="resume-btn" onclick="resumeGame()">RESUME GAME</button>
+            <button style="background:gray; margin-top:10px; color:white; padding:10px; border-radius:10px; border:none; cursor:pointer;" onclick="location.reload()">QUIT</button>
         </div>
 
-        <div class="question-display">
-            <div id="question-text">Loading...</div>
+        <div id="wrong-popup" class="overlay" style="justify-content:center; align-items:center;">
+            <h2 style="color:var(--red)">❌ INCORRECT!</h2>
+            <p id="correct-info" style="font-weight:bold; font-size:1.2rem; color:var(--green); text-align:center; padding:20px;"></p>
+            <p style="color:#888;">Next question loading...</p>
         </div>
 
+        <div class="top-controls">
+            <div id="timer">60</div>
+            <button class="pause-btn" onclick="pauseGame()">PAUSE</button>
+        </div>
+        
+        <div class="result-bar">
+            <div>Correct: <span id="r-ans" style="color:var(--green)">0</span></div>
+            <div>Wrong: <span id="w-ans" style="color:var(--red)">0</span></div>
+            <div>Score: <span id="score-txt" style="color:var(--gold)">0</span></div>
+        </div>
+
+        <div class="question-box"><div id="q-text">Ready to start?</div></div>
         <div class="options-grid" id="options-box"></div>
-
-        <div class="footer-progress">
-            Current Level Progress: <span id="q-count">1</span>/10
-        </div>
     </div>
 
     <script>
-        // --- Questions Database (Add your 500 questions here) ---
-        const questionBank = [
-            { q: "JavaScript ka use kahan hota hai?", a: "Web Development", opts: ["Web Development", "Car Engine", "Medicine", "Agriculture"] },
-            { q: "Bharat ki Rajdhani kahan hai?", a: "New Delhi", opts: ["Mumbai", "Patna", "New Delhi", "Kolkata"] },
-            { q: "Computer ka Dimag kise kehte hain?", a: "CPU", opts: ["RAM", "Monitor", "CPU", "Hard Drive"] },
-            { q: "HTML ka full form kya hai?", a: "HyperText Markup Language", opts: ["HyperText Markup Language", "HighText Machine Language", "Hyperlink Text", "None"] },
-            { q: "Mobile ka avishkar kisne kiya?", a: "Martin Cooper", opts: ["Graham Bell", "Martin Cooper", "Thomas Edison", "Newton"] },
-            // Example for Level 2 (Add more to reach 500)
-            { q: "Python file ka extension kya hota hai?", a: ".py", opts: [".java", ".html", ".py", ".cpp"] }
-        ];
+        let rightAns = 0, wrongAns = 0, score = 0, gameHistory = [];
+        let timeLeft = 60, timer, isPaused = false;
+        let userLang = 'en', selectedCategory = 9;
 
-        let level = 1, qNumber = 0, score = 0, currentIndex = 0;
-        let shuffledList = [], timeLeft = 60, timer;
-
-        function initGame() {
-            document.getElementById("welcome-screen").style.display = "none";
+        function startGame(catId) {
+            userLang = document.getElementById("lang-select").value;
+            selectedCategory = catId;
+            document.getElementById("home-page").style.display = "none";
             document.getElementById("game-container").style.display = "block";
-            // Pure database ko shuffle (mix) kar dena
-            shuffledList = questionBank.sort(() => Math.random() - 0.5);
-            loadNext();
+            fetchQuestion();
         }
 
-        function loadNext() {
-            if (currentIndex >= shuffledList.length) {
-                alert("MUBARAK HO! Aapne saare 50 Levels jeet liye!");
-                location.reload(); return;
+        async function fetchQuestion() {
+            document.getElementById("options-box").innerHTML = "";
+            document.getElementById("q-text").innerHTML = "Analyzing & Fetching High-Level Question...";
+            
+            // Dynamic difficulty: Increases based on correct answers
+            let difficulty = "medium";
+            if(rightAns > 5) difficulty = "hard"; 
+
+            try {
+                const res = await fetch(`https://opentdb.com/api.php?amount=1&category=${selectedCategory}&difficulty=${difficulty}&type=multiple`);
+                const data = await res.json();
+                if(data.results && data.results.length > 0) {
+                    processQuestion(data.results[0]);
+                } else {
+                    throw new Error("API Limit");
+                }
+            } catch (e) { 
+                setTimeout(fetchQuestion, 1500); 
             }
+        }
 
-            resetTimer();
-            const data = shuffledList[currentIndex];
-            document.getElementById("question-text").innerText = data.q;
-            document.getElementById("lvl-txt").innerText = `LEVEL: ${level}/50`;
-            document.getElementById("prize-txt").innerText = `₹${score.toLocaleString()}`;
-            document.getElementById("q-count").innerText = qNumber + 1;
+        async function processQuestion(data) {
+            let q = decodeHTML(data.question);
+            let cor = decodeHTML(data.correct_answer);
+            let opts = data.incorrect_answers.map(decodeHTML);
 
+            if (userLang !== 'en') {
+                q = await translate(q);
+                cor = await translate(cor);
+                for(let i=0; i<opts.length; i++) opts[i] = await translate(opts[i]);
+            }
+            displayQuestion(q, cor, [...opts, cor]);
+        }
+
+        async function translate(text) {
+            try {
+                const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=${userLang}&dt=t&q=${encodeURI(text)}`);
+                const data = await res.json();
+                return data[0][0][0];
+            } catch (e) { return text; }
+        }
+
+        function displayQuestion(q, cor, allOpts) {
+            document.getElementById("wrong-popup").style.display = "none";
+            isPaused = false;
+            document.getElementById("q-text").innerText = q;
+            allOpts.sort(() => Math.random() - 0.5);
+            
             const box = document.getElementById("options-box");
-            box.innerHTML = "";
-            data.opts.forEach(opt => {
+            allOpts.forEach(opt => {
                 const b = document.createElement("button");
                 b.className = "opt-btn";
                 b.innerText = opt;
-                b.onclick = () => check(b, opt, data.a);
+                b.onclick = () => {
+                    if(isPaused) return;
+                    clearInterval(timer);
+                    const isRight = (opt === cor);
+                    gameHistory.push({ q: q, user: opt, correct: cor, status: isRight });
+                    
+                    if(isRight) {
+                        b.classList.add("correct");
+                        rightAns++; score += (timeLeft * 100); // More points for fast answers
+                        setTimeout(fetchQuestion, 1000);
+                    } else {
+                        b.classList.add("wrong");
+                        wrongAns++;
+                        document.getElementById("correct-info").innerText = "Correct Answer: " + cor;
+                        document.getElementById("wrong-popup").style.display = "flex";
+                        setTimeout(fetchQuestion, 3000);
+                    }
+                    updateStats();
+                };
                 box.appendChild(b);
             });
+            resetTimer();
         }
 
-        function check(btn, selected, correct) {
-            clearInterval(timer);
-            const btns = document.querySelectorAll(".opt-btn");
-            btns.forEach(el => el.style.pointerEvents = "none");
-
-            if (selected === correct) {
-                btn.classList.add("correct");
-                score += (level * 5000);
-                qNumber++; currentIndex++;
-
-                if (qNumber >= 10) {
-                    level++; qNumber = 0;
-                    setTimeout(() => alert(`🎉 LEVEL UP! Ab aap Level ${level} par hain.`), 200);
-                }
-                setTimeout(loadNext, 1200);
-            } else {
-                btn.classList.add("wrong");
-                setTimeout(() => {
-                    alert(`❌ GALAT JAWAB!\n\nSahi jawab tha: "${correct}"\n\nAapne jite: ₹${score}`);
-                    location.reload();
-                }, 500);
-            }
+        function updateStats() {
+            document.getElementById("r-ans").innerText = rightAns;
+            document.getElementById("w-ans").innerText = wrongAns;
+            document.getElementById("score-txt").innerText = score.toLocaleString();
         }
 
-        function resetTimer() {
-            clearInterval(timer);
-            timeLeft = 60;
+        function pauseGame() {
+            isPaused = true; clearInterval(timer);
+            const histBox = document.getElementById("detailed-history");
+            histBox.innerHTML = "";
+            gameHistory.slice().reverse().forEach(item => {
+                histBox.innerHTML += `<div style="border-bottom:1px solid #333; padding:10px 0;">
+                    <b>Q: ${item.q}</b><br>
+                    <span style="color:${item.status?'var(--green)':'var(--red)'}">
+                        ${item.status ? '✓ Correct' : '✗ Your Ans: ' + item.user}
+                    </span>
+                    ${!item.status ? '<br><small style="color:var(--green)">Answer: '+item.correct+'</small>' : ''}
+                </div>`;
+            });
+            document.getElementById("pause-overlay").style.display = "flex";
+        }
+
+        function resumeGame() { 
+            document.getElementById("pause-overlay").style.display = "none"; 
+            isPaused = false; 
+            startTimer(); 
+        }
+
+        function resetTimer() { 
+            clearInterval(timer); 
+            timeLeft = 60; 
             document.getElementById("timer").innerText = timeLeft;
+            startTimer(); 
+        }
+
+        function startTimer() {
             timer = setInterval(() => {
-                timeLeft--;
-                document.getElementById("timer").innerText = timeLeft;
-                if (timeLeft <= 0) {
-                    clearInterval(timer);
-                    alert("⏰ TIME OUT! Aapka samay samapt ho gaya.");
-                    location.reload();
+                if(!isPaused) {
+                    timeLeft--;
+                    document.getElementById("timer").innerText = timeLeft;
+                    if(timeLeft <= 0) { 
+                        clearInterval(timer); 
+                        wrongAns++; 
+                        updateStats();
+                        fetchQuestion(); 
+                    }
                 }
             }, 1000);
+        }
+
+        function decodeHTML(html) { 
+            const txt = document.createElement("textarea"); 
+            txt.innerHTML = html; 
+            return txt.value; 
         }
     </script>
 </body>
