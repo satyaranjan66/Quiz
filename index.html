@@ -3,7 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="Content-Security-Policy" content="frame-ancestors 'none';">
+    
     <title>Satya 10 to UPSC & Academic Quiz</title>
+
+    <script>
+        if (top !== self) {
+            top.location.replace(self.location.href);
+        }
+    </script>
+
     <style>
         :root { --gold: #ffcc00; --blue: #00d4ff; --green: #28a745; --red: #dc3545; }
         body {
@@ -126,7 +137,6 @@
             document.getElementById("options-box").innerHTML = "";
             document.getElementById("q-text").innerHTML = "Analyzing & Fetching High-Level Question...";
             
-            // Dynamic difficulty: Increases based on correct answers
             let difficulty = "medium";
             if(rightAns > 5) difficulty = "hard"; 
 
@@ -183,7 +193,7 @@
                     
                     if(isRight) {
                         b.classList.add("correct");
-                        rightAns++; score += (timeLeft * 100); // More points for fast answers
+                        rightAns++; score += (timeLeft * 100); 
                         setTimeout(fetchQuestion, 1000);
                     } else {
                         b.classList.add("wrong");
